@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.config.PromptConfig;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
@@ -41,31 +41,32 @@ public class ChatQueryContext {
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private User user;
     private boolean saveAnswer;
-    @Builder.Default private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
+    @Builder.Default
+    private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private SemanticParseInfo contextParseInfo;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
-    @JsonIgnore private SemanticSchema semanticSchema;
-    @JsonIgnore private ChatWorkflowState chatWorkflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
-    private ChatModelConfig modelConfig;
-    private PromptConfig promptConfig;
+    @JsonIgnore
+    private SemanticSchema semanticSchema;
+    @JsonIgnore
+    private ChatWorkflowState chatWorkflowState;
+    @JsonIgnore
+    private Map<String, ChatApp> chatAppConfig;
+    @JsonIgnore
     private List<Text2SQLExemplar> dynamicExemplars;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         int parseShowCount =
                 Integer.parseInt(parserConfig.getParameterValue(ParserConfig.PARSER_SHOW_COUNT));
-        candidateQueries =
-                candidateQueries.stream()
-                        .sorted(
-                                Comparator.comparing(
-                                        semanticQuery -> semanticQuery.getParseInfo().getScore(),
-                                        Comparator.reverseOrder()))
-                        .limit(parseShowCount)
-                        .collect(Collectors.toList());
+        candidateQueries = candidateQueries.stream()
+                .sorted(Comparator.comparing(
+                        semanticQuery -> semanticQuery.getParseInfo().getScore(),
+                        Comparator.reverseOrder()))
+                .limit(parseShowCount).collect(Collectors.toList());
         return candidateQueries;
     }
 

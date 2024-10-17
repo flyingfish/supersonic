@@ -20,8 +20,8 @@ public class User {
 
     private Integer isAdmin;
 
-    public static User get(
-            Long id, String name, String displayName, String email, Integer isAdmin) {
+    public static User get(Long id, String name, String displayName, String email,
+            Integer isAdmin) {
         return new User(id, name, displayName, email, isAdmin);
     }
 
@@ -29,7 +29,7 @@ public class User {
         return new User(id, name, name, name, 0);
     }
 
-    public static User getFakeUser() {
+    public static User getDefaultUser() {
         return new User(1L, "admin", "admin", "admin@email", 1);
     }
 

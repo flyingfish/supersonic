@@ -19,9 +19,10 @@ import java.util.List;
 
 public class QueryRuleTest extends BaseTest {
 
-    @Autowired private QueryRuleService queryRuleService;
+    @Autowired
+    private QueryRuleService queryRuleService;
 
-    private User user = User.getFakeUser();
+    private User user = User.getDefaultUser();
 
     public QueryRuleReq addSystemRule() {
         QueryRuleReq queryRuleReq = new QueryRuleReq();

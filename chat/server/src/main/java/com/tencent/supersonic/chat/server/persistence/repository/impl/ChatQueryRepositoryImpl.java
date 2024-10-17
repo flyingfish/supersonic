@@ -40,11 +40,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
-    @Autowired private ChatQueryDOMapper chatQueryDOMapper;
+    @Autowired
+    private ChatQueryDOMapper chatQueryDOMapper;
 
-    @Autowired private ChatParseMapper chatParseMapper;
+    @Autowired
+    private ChatParseMapper chatParseMapper;
 
-    @Autowired private ShowCaseCustomMapper showCaseCustomMapper;
+    @Autowired
+    private ShowCaseCustomMapper showCaseCustomMapper;
 
     @Override
     public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoReq, Long chatId) {
@@ -61,17 +64,16 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         queryWrapper.lambda().isNotNull(ChatQueryDO::getQueryResult);
         queryWrapper.lambda().ne(ChatQueryDO::getQueryResult, "");
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
+        queryWrapper.lambda().eq(ChatQueryDO::getQueryState, 1);
 
         PageInfo<ChatQueryDO> pageInfo =
                 PageHelper.startPage(pageQueryInfoReq.getCurrent(), pageQueryInfoReq.getPageSize())
                         .doSelectPageInfo(() -> chatQueryDOMapper.selectList(queryWrapper));
 
         PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
-        chatQueryVOPageInfo.setList(
-                pageInfo.getList().stream()
-                        .sorted(Comparator.comparingInt(o -> o.getQuestionId().intValue()))
-                        .map(this::convertTo)
-                        .collect(Collectors.toList()));
+        chatQueryVOPageInfo.setList(pageInfo.getList().stream()
+                .sorted(Comparator.comparingInt(o -> o.getQuestionId().intValue()))
+                .map(this::convertTo).collect(Collectors.toList()));
         return chatQueryVOPageInfo;
     }
 
@@ -94,22 +96,17 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         QueryWrapper<ChatQueryDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(ChatQueryDO::getChatId, chatId);
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
-        return chatQueryDOMapper.selectList(queryWrapper).stream()
-                .map(q -> convertTo(q))
+        queryWrapper.lambda().eq(ChatQueryDO::getQueryState, 1);
+        return chatQueryDOMapper.selectList(queryWrapper).stream().map(q -> convertTo(q))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
         return showCaseCustomMapper
-                .queryShowCase(
-                        pageQueryInfoReq.getLimitStart(),
-                        pageQueryInfoReq.getPageSize(),
-                        agentId,
-                        pageQueryInfoReq.getUserName())
-                .stream()
-                .map(this::convertTo)
-                .collect(Collectors.toList());
+                .queryShowCase(pageQueryInfoReq.getLimitStart(), pageQueryInfoReq.getPageSize(),
+                        agentId, pageQueryInfoReq.getUserName())
+                .stream().map(this::convertTo).collect(Collectors.toList());
     }
 
     private QueryResp convertTo(ChatQueryDO chatQueryDO) {
@@ -121,9 +118,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             queryResult.setQueryId(chatQueryDO.getQuestionId());
             queryResp.setQueryResult(queryResult);
         }
-        queryResp.setSimilarQueries(
-                JSONObject.parseArray(
-                        chatQueryDO.getSimilarQueries(), SimilarQueryRecallResp.class));
+        queryResp.setSimilarQueries(JSONObject.parseArray(chatQueryDO.getSimilarQueries(),
+                SimilarQueryRecallResp.class));
         queryResp.setParseTimeCost(
                 JsonUtil.toObject(chatQueryDO.getParseTimeCost(), ParseTimeCostResp.class));
         return queryResp;
@@ -138,6 +134,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         chatQueryDO.setQueryText(chatParseReq.getQueryText());
         chatQueryDO.setAgentId(chatParseReq.getAgentId());
         chatQueryDO.setQueryResult("");
+        chatQueryDO.setQueryState(1);
         try {
             chatQueryDOMapper.insert(chatQueryDO);
         } catch (Exception e) {
@@ -147,9 +144,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public List<ChatParseDO> batchSaveParseInfo(
-            ChatParseReq chatParseReq,
-            ParseResp parseResult,
+    public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ParseResp parseResult,
             List<SemanticParseInfo> candidateParses) {
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
         getChatParseDO(chatParseReq, parseResult.getQueryId(), candidateParses, chatParseDOList);
@@ -159,11 +154,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatParseDOList;
     }
 
-    public void getChatParseDO(
-            ChatParseReq chatParseReq,
-            Long queryId,
-            List<SemanticParseInfo> parses,
-            List<ChatParseDO> chatParseDOList) {
+    public void getChatParseDO(ChatParseReq chatParseReq, Long queryId,
+            List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
             chatParseDO.setChatId(chatParseReq.getChatId());

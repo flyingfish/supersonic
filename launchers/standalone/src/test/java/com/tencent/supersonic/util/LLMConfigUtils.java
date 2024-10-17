@@ -13,7 +13,7 @@ public class LLMConfigUtils {
         OLLAMA_QWEN2(true),
         OLLAMA_QWEN25(true);
 
-        private boolean isOllam;
+        public boolean isOllam;
 
         LLMType(boolean isOllam) {
             this.isOllam = isOllam;
@@ -64,30 +64,18 @@ public class LLMConfigUtils {
             default:
                 baseUrl = "https://api.openai.com/v1";
                 apiKey = "REPLACE_WITH_YOUR_KEY";
-                modelName = "gpt-3.5-turbo";
+                modelName = "gpt-4o";
                 temperature = 0.0;
         }
 
         ChatModelConfig chatModelConfig;
         if (type.isOllam) {
-            chatModelConfig =
-                    ChatModelConfig.builder()
-                            .provider("ollama")
-                            .baseUrl(baseUrl)
-                            .modelName(modelName)
-                            .temperature(temperature)
-                            .timeOut(60000L)
-                            .build();
+            chatModelConfig = ChatModelConfig.builder().provider("OLLAMA").baseUrl(baseUrl)
+                    .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         } else {
             chatModelConfig =
-                    ChatModelConfig.builder()
-                            .provider("open_ai")
-                            .baseUrl(baseUrl)
-                            .apiKey(apiKey)
-                            .modelName(modelName)
-                            .temperature(temperature)
-                            .timeOut(60000L)
-                            .build();
+                    ChatModelConfig.builder().provider("OPEN_AI").baseUrl(baseUrl).apiKey(apiKey)
+                            .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         }
 
         return chatModelConfig;

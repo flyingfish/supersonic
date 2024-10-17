@@ -22,9 +22,8 @@ import java.lang.reflect.Method;
 public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor {
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws AccessException {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+            Object handler) throws AccessException {
         authenticationConfig = ContextUtils.getBean(AuthenticationConfig.class);
         userServiceImpl = ContextUtils.getBean(UserServiceImpl.class);
         userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
@@ -70,15 +69,13 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
     private void setFakerUser(HttpServletRequest request) {
         String token = userTokenUtils.generateAdminToken(request);
         reflectSetParam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
-        setContext(User.getFakeUser().getName(), request);
+        setContext(User.getDefaultUser().getName(), request);
     }
 
     private void setContext(String userName, HttpServletRequest request) {
-        ThreadContext threadContext =
-                ThreadContext.builder()
-                        .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
-                        .userName(userName)
-                        .build();
+        ThreadContext threadContext = ThreadContext.builder()
+                .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
+                .userName(userName).build();
         s2ThreadContext.set(threadContext);
     }
 }

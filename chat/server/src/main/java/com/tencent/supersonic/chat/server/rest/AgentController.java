@@ -8,7 +8,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.util.LLMConnHelper;
+import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,21 +26,18 @@ import java.util.Map;
 @RequestMapping({"/api/chat/agent", "/openapi/chat/agent"})
 public class AgentController {
 
-    @Autowired private AgentService agentService;
+    @Autowired
+    private AgentService agentService;
 
     @PostMapping
-    public Agent createAgent(
-            @RequestBody Agent agent,
-            HttpServletRequest httpServletRequest,
+    public Agent createAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public Agent updateAgent(
-            @RequestBody Agent agent,
-            HttpServletRequest httpServletRequest,
+    public Agent updateAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.updateAgent(agent, user);
@@ -62,8 +59,4 @@ public class AgentController {
         return AgentToolType.getToolTypes();
     }
 
-    @PostMapping("/testLLMConn")
-    public boolean testLLMConn(@RequestBody ChatModelConfig modelConfig) {
-        return LLMConnHelper.testConnection(modelConfig);
-    }
 }

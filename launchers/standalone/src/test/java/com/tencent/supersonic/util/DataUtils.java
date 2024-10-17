@@ -19,7 +19,7 @@ public class DataUtils {
     public static final Integer tagAgentId = 2;
     public static final Integer ONE_TURNS_CHAT_ID = 10;
     public static final Integer MULTI_TURNS_CHAT_ID = 11;
-    private static final User user_test = User.getFakeUser();
+    private static final User user_test = User.getDefaultUser();
 
     public static User getUser() {
         return user_test;
@@ -37,11 +37,12 @@ public class DataUtils {
         return User.get(3L, "tom");
     }
 
-    public static ChatParseReq getChatParseReq(Integer id, String query) {
+    public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
+        chatParseReq.setDisableLLM(!enableLLM);
         return chatParseReq;
     }
 
@@ -49,12 +50,8 @@ public class DataUtils {
         return SchemaElement.builder().name(name).build();
     }
 
-    public static QueryFilter getFilter(
-            String bizName,
-            FilterOperatorEnum filterOperatorEnum,
-            Object value,
-            String name,
-            Long elementId) {
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum,
+            Object value, String name, Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -64,8 +61,8 @@ public class DataUtils {
         return filter;
     }
 
-    public static DateConf getDateConf(
-            Integer unit, DateConf.DateMode dateMode, DatePeriodEnum period) {
+    public static DateConf getDateConf(Integer unit, DateConf.DateMode dateMode,
+            DatePeriodEnum period) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
@@ -75,12 +72,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(
-            DateConf.DateMode dateMode,
-            Integer unit,
-            DatePeriodEnum period,
-            String startDate,
-            String endDate) {
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit,
+            DatePeriodEnum period, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
